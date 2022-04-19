@@ -3,6 +3,7 @@ import pyautogui
 import time
 import random
 from time import gmtime, strftime
+from pathlib import Path
 
 import Input
 import Imaging
@@ -12,6 +13,9 @@ SCREEN_WIDTH, SCREEN_HEIGHT = pyautogui.size()
 MENU_DEPTH = 0
 
 OriginalMouseLocation = pyautogui.position()
+base_path = Path(__file__).parent
+repairTool_IconPath = str(
+    (base_path / "../Resources/repairTools_icon.png").resolve())
 
 
 def openPetMenu(keys: Union[list, str]):
@@ -72,7 +76,7 @@ class __ToolRepair(PetSubMenu):
     def __init__(self, ratio=16/9):
         super().__init__()
 
-        self.Icon = Imaging.imageToFind('Resources/repairTools_icon.png')
+        self.Icon = Imaging.imageToFind(repairTool_IconPath)
         self.IconSize = {"width": len(self.Icon[0]),
                          "height": len(self.Icon)}
 

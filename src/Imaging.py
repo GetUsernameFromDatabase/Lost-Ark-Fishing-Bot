@@ -22,7 +22,7 @@ class ImageSearch:
     def __init__(self, what: ndarray, where: Image):
         self.ConfidenceTreshold = 0.8
         self.PositiveMatches = None
-        
+
         pixelsNumpy = np.array(where)
         grayscaleImage = cv2.cvtColor(pixelsNumpy, cv2.COLOR_BGR2GRAY)
 
@@ -46,7 +46,7 @@ class ImageSearch:
     def getCoordOfFirstPositiveMatch(self):
         if self.PositiveMatches is None:
             self.getPositiveMatches()
-        
+
         if not self.isThereAMatch():
             return False
 

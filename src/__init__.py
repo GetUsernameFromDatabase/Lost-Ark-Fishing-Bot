@@ -2,6 +2,7 @@ import time
 from time import gmtime, strftime
 import random
 import pyautogui
+from pathlib import Path
 
 import Imaging
 import Input
@@ -21,7 +22,10 @@ IDLETIMER = 0
 MAXIDLE = 666
 
 screenWidth, screenHeight = pyautogui.size()
-CaughtFish_Icon = Imaging.imageToFind('Resources/fishing_icon.png')
+base_path = Path(__file__).parent
+CaughtFish_IconPath = str(
+    (base_path / "../Resources/fishing_icon.png").resolve())
+CaughtFish_Icon = Imaging.imageToFind(CaughtFish_IconPath)
 
 
 def ActivateFloatFishing():
@@ -52,7 +56,7 @@ def rodPulled():
 
 def pullFishingRod():
     print(strftime("%H:%M:%S", gmtime()),
-          f"Detected catch! Reeling in lure nr {COUNTER}")
+          f"Detected catch! Reeling in lure nr {COUNTER - 1}")
 
     ActivateFloatFishing()
     rodPulled()
