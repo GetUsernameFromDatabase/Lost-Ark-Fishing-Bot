@@ -1,6 +1,8 @@
 # Usage guide
 
-Go to a fishing spot and run `src/__init__.py` with Python
+Bet at a fishing spot, 
+*using a terminal* run `python src` inside the downloaded folder (*"Lost-Ark-Fishing-Bot"*)  
+and switch over to the game.
 
 #### Fishing Spots
 
@@ -19,7 +21,7 @@ Supported aspect ratio is 16:9, repairs _currently_ will not work with any other
 
 # Configuration
 
-The only supported way to configure stuff _(change keybindings, when repairs happen)_ is by editing the `src/__init__.py` file.
+The only supported way to configure stuff _(change keybindings, when repairs happen)_ is by editing the [`src/__main__.py`](src/__main__.py) file.
 
 # Installation
 
