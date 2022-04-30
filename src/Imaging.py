@@ -1,8 +1,10 @@
+# External import
 import pyautogui
 from PIL.Image import Image
 import cv2
 import numpy as np
 from numpy import ndarray
+# Project import
 from CustomTypes import Coord
 
 

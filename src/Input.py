@@ -1,7 +1,13 @@
-import pyautogui
+# Python Built-in import
 from typing import Union
+# External import
+import pyautogui
+# Project import
 from CustomTypes import Coord
 
+KEYBINDINGS = {"fish": "q",
+               "petMenu": ["alt", "p"],
+               }
 SCREEN_WIDTH, SCREEN_HEIGHT = pyautogui.size()
 
 
@@ -27,6 +33,10 @@ def clickRelativeToScreen(offset: Coord):
     coord = {"x": round(SCREEN_WIDTH * offset["x"]),
              "y": round(SCREEN_HEIGHT * offset["y"])}
     clickOnScreen(coord)
+
+
+def escape():
+    pressKeys("esc")
 
 # ----- TESTING -----
 

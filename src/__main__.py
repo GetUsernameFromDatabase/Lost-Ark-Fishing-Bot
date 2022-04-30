@@ -1,98 +1,51 @@
-import time
-from time import gmtime, strftime
-import random
-import pyautogui
-from pathlib import Path
-
-import Imaging
+# Python Built-in import
+from time import sleep
+# Project import
 import Input
+import Imaging
 import PetMenu
+import Fishing
+import Notifications as Notifs
+from Notifications import xprint
 
-# Configuration
 TIME_TILL_START = 4  # Seconds
 REPAIR_COUNTER = 10  # Repair after __ throws
-REPAIRS = True
-KEYBINDINGS = {"fish": "q",
-               "petMenu": ["alt", "p"]}
-# - - - - - - - - - - - - -
 
-FLAG = "pulled"
-COUNTER = 1
-IDLETIMER = 0
-MAXIDLE = 666
+scrWidth, scrHeight = Input.SCREEN_WIDTH, Input.SCREEN_HEIGHT
 
-screenWidth, screenHeight = pyautogui.size()
-base_path = Path(__file__).parent
-CaughtFish_IconPath = str(
-    (base_path / "../Resources/fishing_icon.png").resolve())
-CaughtFish_Icon = Imaging.imageToFind(CaughtFish_IconPath)
+Notifs.initializingBot(TIME_TILL_START, REPAIR_COUNTER)
+sleep(TIME_TILL_START)
+Notifs.botInitialized()
 
-
-def ActivateFloatFishing():
-    key = KEYBINDINGS["fish"]
-    Input.pressKeys(key)
-
-
-def castFishingRod():
-    print(strftime("%H:%M:%S", gmtime()),
-          f"Casting fishing rod. Counter: {COUNTER}")
-
-    ActivateFloatFishing()
-    rodThrown()
-    time.sleep(random.uniform(4.5, 6.5))
-
-
-def rodThrown():
-    global FLAG, COUNTER
-    COUNTER += 1
-    FLAG = "thrown"
-
-
-def rodPulled():
-    global FLAG, IDLETIMER
-    IDLETIMER = 0
-    FLAG = "pulled"
-
-
-def pullFishingRod():
-    print(strftime("%H:%M:%S", gmtime()),
-          f"Detected catch! Reeling in lure nr {COUNTER - 1}")
-
-    ActivateFloatFishing()
-    rodPulled()
-    time.sleep(random.uniform(6, 7.5))
-
-
-repairNotification = f"Automatic repair every {REPAIR_COUNTER} casts" if REPAIRS else "Automatic repairs are disabled"
-launchMessage = f"Starting the bot in {TIME_TILL_START} seconds! {repairNotification}."
-print(strftime("%H:%M:%S", gmtime()), launchMessage)
-
-time.sleep(TIME_TILL_START)
-print(strftime("%H:%M:%S", gmtime()), "Started!")
-
+idles = Fishing.WAIT_COUNTER
+casts = Fishing.CAST_COUNTER
+maxIdleReached = False
 while True:
-    if IDLETIMER == MAXIDLE:
-        # By this time rod should be automatically pulled
-        print(f"Idle timer reached 500. Recasting now.")
-        rodPulled()
 
-    if FLAG == "pulled":
-        if REPAIRS and (COUNTER % REPAIR_COUNTER == 0):
-            print(strftime("%H:%M:%S", gmtime()),
-                  f"Counter: {COUNTER}. Repairing now. flag: {FLAG}")
-            PetMenu.repairTools(KEYBINDINGS["petMenu"])
-        castFishingRod()
+    if Fishing.STATUS == Fishing.HOME:
+        if (REPAIR_COUNTER != 0) and (casts.count % REPAIR_COUNTER == 0):
+            xprint(Notifs.PetMenu.Repairs.repairsStarted(casts.count),
+                   Notifs.showFlag(Fishing.STATUS))
+            PetMenu.repairTools()
+        Fishing.castFishingRod()
+        continue
+    elif maxIdleReached:
+        # By this time rod should be automatically pulled
+        Notifs.Fishing.maxIdleReached(idles.maxValue)
+        Fishing.rodPulled()
     else:
-        print(strftime("%H:%M:%S", gmtime()),
-              f"Waiting for a fish. Idle timer: {IDLETIMER}. Recast at {MAXIDLE}. flag: {FLAG}")
+        xprint(Notifs.Fishing.waiting(),
+               Notifs.Fishing.idleStatus(idles.count, idles.maxValue),
+               Notifs.showFlag(Fishing.STATUS))
 
     # Taking a screenshot
     screenshotOfCenter = Imaging.screenshot(
-        {"x": screenWidth/2 - 32, "y": screenHeight/2 - 100}, {"x": 64, "y": 128})
+        {"x": scrWidth/2 - 32, "y": scrHeight/2 - 100},
+        {"x": 64, "y": 128})
 
     # Deciding wether to pull or not
-    imgSearch = Imaging.ImageSearch(CaughtFish_Icon, screenshotOfCenter)
+    imgSearch = Fishing.searchForCatch(screenshotOfCenter)
     if imgSearch.isThereAMatch():
-        pullFishingRod()
+        Fishing.pullFishingRod()
 
-    IDLETIMER += 1
+    maxIdleReached = idles.increase()

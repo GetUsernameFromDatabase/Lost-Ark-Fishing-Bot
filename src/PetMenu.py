@@ -1,15 +1,16 @@
-from typing import Union
-import pyautogui
+# Python Built-in import
 import time
 import random
-from time import gmtime, strftime
 from pathlib import Path
-
+# External import
+import pyautogui
+# Project import
 import Input
 import Imaging
+import Notifications as Notifs
+from Notifications import xprint
 
-ESCAPE_KEY = "esc"
-SCREEN_WIDTH, SCREEN_HEIGHT = pyautogui.size()
+WIDTH, HEIGHT = Input.SCREEN_WIDTH, Input.SCREEN_HEIGHT
 MENU_DEPTH = 0
 
 OriginalMouseLocation = pyautogui.position()
@@ -18,61 +19,73 @@ repairTool_IconPath = str(
     (base_path / "../Resources/repairTools_icon.png").resolve())
 
 
-def openPetMenu(keys: Union[list, str]):
+def surface(level: int = 0):
+    """_summary_
+    Reduces menu depth till it reaches desired level
+
+    Args:
+        level (int, optional): Menu Depth to surface to. Defaults to 0.
+    """
     global MENU_DEPTH
-    keyBinds_HumanReadable = " + ".join(keys).upper()
-    notification = f"Opening pet inventory ({keyBinds_HumanReadable})."
-    print(strftime("%H:%M:%S", gmtime()), notification)
-
-    MENU_DEPTH += 1
-    Input.pressKeys(keys)
-    time.sleep(random.uniform(1.0, 2.5))
-
-
-def exitFromPetMenu():
-    global MENU_DEPTH
-
     while True:
-        if MENU_DEPTH < 1:
+        if MENU_DEPTH <= level:
             return
-        Input.pressKeys(ESCAPE_KEY)
-        time.sleep(random.uniform(0.5, 1.5))
+        Input.escape()
+        time.sleep(random.uniform(0.25, 1.25))
         MENU_DEPTH -= 1
+
+
+def getToPetMenu():
+    global MENU_DEPTH
+    keys = Input.KEYBINDINGS["petMenu"]
+
+    steps = MENU_DEPTH - 1
+    if steps == 0:
+        return
+
+    Notifs.PetMenu.navigatingToPetMenu()
+    if steps < 0:  # It shouldn't be possible for it to be below -1
+        MENU_DEPTH += 1
+        Input.pressKeys(keys)
+    else:
+        surface(1)
+    time.sleep(random.uniform(1.0, 2.5))
 
 
 def returnMouse():
     pyautogui.moveTo(OriginalMouseLocation.x,
                      OriginalMouseLocation.y,
-                     random.uniform(1.0, 2.0))
+                     random.uniform(0.2, 0.75))
 
 
 class PetSubMenu:
-    def preparingToOpenSubmenu(self, submenuName):
+    def _preparingToOpenSubmenu(self, submenuName):
         global OriginalMouseLocation
         OriginalMouseLocation = pyautogui.position()
 
-        print(strftime("%H:%M:%S", gmtime()),
-              f"Clicking on Pet Function: {submenuName}.")
+        Notifs.PetMenu.openingSubmenu(submenuName)
         # To reduce possible interference from tooltips
-        pyautogui.moveTo(SCREEN_WIDTH/2, 0, 0.3)
+        pyautogui.moveTo(WIDTH/2, 0, 0.3)
         time.sleep(0.5)
 
-    def subMenuOpened(self):
+    def _subMenuOpened(self):
         global MENU_DEPTH
         MENU_DEPTH += 1
         time.sleep(random.uniform(0.5, 1.5))
 
-    def subMenuClosed(self):
+    def _subMenuClosed(self):
         global MENU_DEPTH
         MENU_DEPTH -= 1
         returnMouse()
 
     def closeSubMenu(self):
-        Input.pressKeys(ESCAPE_KEY)
-        self.subMenuClosed()
+        Input.escape()
+        self._subMenuClosed()
 
 
 class __ToolRepair(PetSubMenu):
+    name = "remote repair"
+
     def __init__(self, ratio=16/9):
         super().__init__()
 
@@ -93,59 +106,66 @@ class __ToolRepair(PetSubMenu):
         }
 
     def openSubmenu(self):
-        self.preparingToOpenSubmenu("remote repair")
+        """_summary_
+        Tries to open the remote repair submenu
+
+        Returns:
+            string: description of failure
+        """
+        self._preparingToOpenSubmenu(self.name)
+        getToPetMenu()
 
         screenshot = Imaging.screenshot()
         imgSearch = Imaging.ImageSearch(self.Icon, screenshot)
         coord = imgSearch.getCoordOfFirstPositiveMatch()
         if coord == False:
-            print(strftime("%H:%M:%S", gmtime()),
-                  "Failed to open tool repair. Exiting from pet menu")
-            exitFromPetMenu()
-            return
+            Notifs.PetMenu.failedToOpenSubmenu(self.name)
+            self.closeSubMenu()
+            return "Didn't find remote repair"
 
         Input.clickOnScreen({"x": coord["x"] + self.IconSize["width"] / 2,
                              "y": coord["y"] + self.IconSize["height"] / 2})
-        self.subMenuOpened()
+        self._subMenuOpened()
 
-    def repairAll_ButtonPress(self):
-        print(strftime("%H:%M:%S", gmtime()), "Clicking on Repair All button.")
+    def __repairAll_ButtonPress(self):
+        Notifs.PetMenu.Repairs.clickingRepairAll()
         Input.clickRelativeToScreen(self.Offsets["repairAll"])
 
-    def confirmRepair_ButtonPress(self):
+    def __confirmRepair_ButtonPress(self):
         # Repair OK offset
-        print(strftime("%H:%M:%S", gmtime()), "Clicking on OK button.")
+        Notifs.PetMenu.Repairs.clickingOK()
         Input.clickRelativeToScreen(self.Offsets["confirm"])
 
     def repair(self):
-        self.repairAll_ButtonPress()
-        self.confirmRepair_ButtonPress()
+        if MENU_DEPTH != 1:
+            outcome = self.openSubmenu()
+            if outcome != None:
+                return
+        self.__repairAll_ButtonPress()
+        self.__confirmRepair_ButtonPress()
         self.closeSubMenu()
 
 
-def repairTools(openPetMenu_Keybinding: Union[list, str]):
+def repairTools():
     # Development: get current mouse position
     pyautogui.position()
 
-    openPetMenu(openPetMenu_Keybinding)
     toolRepair = __ToolRepair()
-    toolRepair.openSubmenu()
     toolRepair.repair()
 
     # Exiting from Pet Menu
     time.sleep(random.uniform(0.25, 3))
-    print(strftime("%H:%M:%S", gmtime()), "Closing the Pet Window.")
-    exitFromPetMenu()
+    surface()
 
 
 def __repairTools_TEST():
-    openPetMenu(["alt", "p"])
     toolRepair = __ToolRepair()
-    toolRepair.openSubmenu()
     toolRepair.repair()
+    surface()
 
 
 if __name__ == "__main__":
-    print("This is not meant to be run Standalone")
-    time.sleep(3)
+    waitTime = 3
+    xprint(f"Starting the pet menu test in {waitTime} seconds\n")
+    time.sleep(waitTime)
     __repairTools_TEST()
