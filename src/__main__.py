@@ -7,13 +7,15 @@ import PetMenu
 import Fishing
 import Notifications as Notifs
 from Notifications import xprint
+from Configuration import TIME_TILL_START, REPAIR_DIVIDER
 
-TIME_TILL_START = 4  # Seconds
-REPAIR_COUNTER = 10  # Repair after __ throws
+
+if __name__ != "__main__":
+    raise RuntimeError("This is not meant to be imported")
 
 scrWidth, scrHeight = Input.SCREEN_WIDTH, Input.SCREEN_HEIGHT
 
-Notifs.initializingBot(TIME_TILL_START, REPAIR_COUNTER)
+Notifs.initializingBot(TIME_TILL_START, REPAIR_DIVIDER)
 sleep(TIME_TILL_START)
 Notifs.botInitialized()
 
@@ -21,9 +23,9 @@ idles = Fishing.WAIT_COUNTER
 casts = Fishing.CAST_COUNTER
 maxIdleReached = False
 while True:
-
     if Fishing.STATUS == Fishing.HOME:
-        if (REPAIR_COUNTER != 0) and (casts.count % REPAIR_COUNTER == 0):
+        # +1 so it would be after the Xth cast not before
+        if (REPAIR_DIVIDER != 0) and ((casts.count + 1) % REPAIR_DIVIDER == 0):
             xprint(Notifs.PetMenu.Repairs.repairsStarted(casts.count),
                    Notifs.showFlag(Fishing.STATUS))
             PetMenu.repairTools()

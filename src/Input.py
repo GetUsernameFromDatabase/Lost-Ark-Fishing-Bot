@@ -5,9 +5,6 @@ import pyautogui
 # Project import
 from CustomTypes import Coord
 
-KEYBINDINGS = {"fish": "q",
-               "petMenu": ["alt", "p"],
-               }
 SCREEN_WIDTH, SCREEN_HEIGHT = pyautogui.size()
 
 

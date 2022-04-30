@@ -4,6 +4,18 @@ Bet at a fishing spot,
 *using a terminal* run `python src` inside the downloaded folder (*"Lost-Ark-Fishing-Bot"*)  
 and switch over to the game.
 
+```yml
+advanced usage: src [-h] [-r] [-tts] [-ak]
+
+options:
+  -h, --help            show this help message and exit
+  -r , --repair         Defines after how many fishing rod casts repairs happen. 
+                        Set as 0 to disable
+  -tts , --timeTillStart
+                        How long to wait (in seconds) till the bot starts
+  -ak , --actionKey     The action key for fishing
+```
+
 #### Fishing Spots
 
 This bot works best with fishing spots which are contrast to the caught fishing icon ![fishingIcon](Resources/fishing_icon.png). So in places which are as dissimilar to this image as possible (comparison is done in greyscale).

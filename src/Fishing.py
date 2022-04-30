@@ -10,6 +10,7 @@ import Imaging
 import Input
 from Counter import Counter
 from Notifications import xprint
+from Configuration import Keybindings
 
 
 # https://stackoverflow.com/questions/46757958/how-to-create-a-return-flag-object
@@ -54,7 +55,7 @@ def searchForCatch(huntingGrounds: Image):
 
 
 def activateFloatFishing():
-    Input.pressKeys(Input.KEYBINDINGS["fish"])
+    Input.pressKeys(Keybindings.Fish)
 
 
 def castFishingRod():

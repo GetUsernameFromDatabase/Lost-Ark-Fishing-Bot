@@ -9,6 +9,7 @@ import Input
 import Imaging
 import Notifications as Notifs
 from Notifications import xprint
+from Configuration import Keybindings
 
 WIDTH, HEIGHT = Input.SCREEN_WIDTH, Input.SCREEN_HEIGHT
 MENU_DEPTH = 0
@@ -37,8 +38,6 @@ def surface(level: int = 0):
 
 def getToPetMenu():
     global MENU_DEPTH
-    keys = Input.KEYBINDINGS["petMenu"]
-
     steps = MENU_DEPTH - 1
     if steps == 0:
         return
@@ -46,7 +45,7 @@ def getToPetMenu():
     Notifs.PetMenu.navigatingToPetMenu()
     if steps < 0:  # It shouldn't be possible for it to be below -1
         MENU_DEPTH += 1
-        Input.pressKeys(keys)
+        Input.pressKeys(Keybindings.PetMenu)
     else:
         surface(1)
     time.sleep(random.uniform(1.0, 2.5))

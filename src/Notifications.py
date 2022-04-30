@@ -1,7 +1,7 @@
 # Python Built-in import
 from time import strftime
 # Project import
-import Input
+from Configuration import Keybindings
 
 
 def xprint(*args, **kwargs):
@@ -45,8 +45,7 @@ def botInitialized(print: bool = True):
 
 class PetMenu:
     def navigatingToPetMenu(print: bool = True):
-        keys = Input.KEYBINDINGS["petMenu"]
-        keys_humanReadable = " + ".join(keys).upper()
+        keys_humanReadable = " + ".join(Keybindings.PetMenu).upper()
         notif = f"Going to the pet inventory menu ({keys_humanReadable})."
         return _toPrintOrNotToPrint(notif, print)
 
